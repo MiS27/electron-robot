@@ -17,8 +17,7 @@ class Env:
         """Tworzy srodowisko na podstawie opisu z pliku. Plik powinien miec nastepujacy format:
         <height> <width>
         <n>
-        <d> <c> <p_m> <t_q>
-        <n_p> <s_q>
+        <d> <c> <p_m> <t_q> <n_p> <s_q>
         d - czy wie gdzie jest; KnownAgent byłby potrzebny do tego... ale go nie ma
         c - color
         p_m - prawdopodobienstwo ruchu
@@ -40,7 +39,7 @@ class Env:
 
         for i in range(self.n):
             tokens = file.readline().strip().split()
-            d = bool(tokens[0])
+            d = 1 == int(tokens[0])
             c = tokens[1]
             p_m = float(tokens[2])
             t_q = float(tokens[3])
