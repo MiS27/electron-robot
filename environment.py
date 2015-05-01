@@ -17,9 +17,10 @@ class Env:
         """Tworzy srodowisko na podstawie opisu z pliku. Plik powinien miec nastepujacy format:
         <height> <width>
         <n>
-        <d> <p_m> <t_q>
+        <d> <c> <p_m> <t_q>
         <n_p> <s_q>
         d - czy wie gdzie jest
+        c - color
         p_m - prawdopodobienstwo ruchu
         t_q - jakość transmisji o ile sygnał danego transmitera może być zły
         n_p - liczba cząsteczek
@@ -40,17 +41,18 @@ class Env:
         for i in range(self.n):
             tokens = file.readline().strip().split()
             d = bool(tokens[0])
-            p_m = float(tokens[1])
-            t_q = float(tokens[2])
+            c = tokens[1]
+            p_m = float(tokens[2])
+            t_q = float(tokens[3])
             agent = None
             n_p = 1
             s_q = 1.0
             if d is not True:
-                n_p = int(tokens[3])
-                s_q = float(tokens[4])
-                agent = ParticleAgent(p_m, n_p, s_q, t_q, self.width, self.height)
+                n_p = int(tokens[4])
+                s_q = float(tokens[5])
+                agent = ParticleAgent(p_m, n_p, s_q, t_q, c, self.width, self.height)
             else:
-                agent = ParticleAgent(p_m, n_p, s_q, t_q, self.width, self.height)
+                agent = ParticleAgent(p_m, n_p, s_q, t_q, c, self.width, self.height)
                 #agent = KnownAgent(p_m, n_p, s_q, t_q)
             self.agents.append(agent)
             x = random.randint(0, self.width - 1)
@@ -90,7 +92,7 @@ class Env:
         return (self.agentsInfo[agent]["x"],self.agentsInfo[agent]["y"])
 
     def run_action(self, action):
-        if action is Action.TAB:
+        if action is Action.SHIFT:
             self.currentAgent = next(self.cycleAgents)
         else:
             motion = list(Env.__MOTIONS[action])

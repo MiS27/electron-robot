@@ -13,5 +13,5 @@ class Action:
     RIGHT = '+X'
     """Ruch w prawo (w kierunku rosnacych indeksow X)."""
 
-    TAB = 'C'
+    SHIFT = 'Shift'
     """Zmiana sterowanego robota."""

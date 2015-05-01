@@ -30,13 +30,14 @@ class Visualiser():
             action = Action.RIGHT
         if event.key=='left':
             action = Action.LEFT
-        if event.key=='tab':
-            action = Action.TAB
+        if event.key=='shift':
+            action = Action.SHIFT
         if event.key=='escape':
             plt.close()
             return
-        self.environment.run_action(action)
-        self.draw()
+        if action is not None:
+            self.environment.run_action(action)
+            self.draw()
 
     def draw(self):
         plt.cla()
@@ -48,6 +49,6 @@ class Visualiser():
             for particle in agent.particles:
                 x.append(particle[0])
                 y.append(particle[1])
-            plt.scatter(pos[0], pos[1], s=Visualiser.__AGENT_AREA , alpha=0.5)
-            plt.scatter(x, y, s=Visualiser.__PARTICE_AREA, alpha=0.5)
+            plt.scatter(pos[0], pos[1], c=agent.color, s=Visualiser.__AGENT_AREA , alpha=0.5)
+            plt.scatter(x, y, c=agent.color, s=Visualiser.__PARTICE_AREA, alpha=0.5)
         plt.draw()
