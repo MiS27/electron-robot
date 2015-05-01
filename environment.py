@@ -19,7 +19,7 @@ class Env:
         <n>
         <d> <c> <p_m> <t_q>
         <n_p> <s_q>
-        d - czy wie gdzie jest
+        d - czy wie gdzie jest; KnownAgent byłby potrzebny do tego... ale go nie ma
         c - color
         p_m - prawdopodobienstwo ruchu
         t_q - jakość transmisji o ile sygnał danego transmitera może być zły
