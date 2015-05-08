@@ -6,9 +6,10 @@ class Visualiser():
 
     __AGENT_AREA = np.pi * (15)**2
 
-    __PARTICE_AREA = np.pi * (5)**2
+    __PARTICE_AREA = np.pi * (2)**2
 
     def __init__(self, environment):
+        self.signal = False
         self.environment = environment
         plt.ion()
         plt.axis([0,environment.width,0,environment.height])
@@ -34,10 +35,13 @@ class Visualiser():
             action = Action.SHIFT
         if event.key=='escape':
             plt.close()
-            return
+        if event.key=='x':
+            self.signal = not self.signal
+            self.draw()
         if action is not None:
             self.environment.run_action(action)
             self.draw()
+        return
 
     def draw(self):
         plt.cla()
@@ -51,4 +55,26 @@ class Visualiser():
                 y.append(particle[1])
             plt.scatter(pos[0], pos[1], c=agent.color, s=Visualiser.__AGENT_AREA , alpha=0.5)
             plt.scatter(x, y, c=agent.color, s=Visualiser.__PARTICE_AREA, alpha=0.5)
+        if self.signal:
+            self.drawSignals()
         plt.draw()
+
+    def drawSignals(self):
+        for transmission in self.environment.transmissions:
+            agent = transmission[0]
+            signal = transmission[1]
+            (x, y) = self.environment.agentPosition(agent)
+            line1 = [(x-signal, y),(x,y+signal)]
+            line2 = [(x, y+signal),(x+signal,y)]
+            line3 = [(x+signal, y),(x,y-signal)]
+            line4 = [(x, y-signal),(x-signal,y)]
+            (line1_xs, line1_ys) = zip(*line1)
+            (line2_xs, line2_ys) = zip(*line2)
+            (line3_xs, line3_ys) = zip(*line3)
+            (line4_xs, line4_ys) = zip(*line4)
+            plt.plot(line1_xs, line1_ys,color=agent.color, linewidth=1, linestyle='-', alpha = 1)
+            plt.plot(line2_xs, line2_ys,color=agent.color, linewidth=1, linestyle='-', alpha = 1)
+            plt.plot(line3_xs, line3_ys,color=agent.color, linewidth=1, linestyle='-', alpha = 1)
+            plt.plot(line4_xs, line4_ys,color=agent.color, linewidth=1, linestyle='-', alpha = 1)
+            plt.show()
+

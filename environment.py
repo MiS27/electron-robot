@@ -3,6 +3,7 @@ import random
 from action import Action
 from itertools import cycle
 from agents.particle import ParticleAgent
+from agents.known import KnownAgent
 
 class Env:
     __MOTIONS = {
@@ -17,13 +18,16 @@ class Env:
         """Tworzy srodowisko na podstawie opisu z pliku. Plik powinien miec nastepujacy format:
         <height> <width>
         <n>
-        <d> <c> <p_m> <t_q> <n_p> <s_q>
-        d - czy wie gdzie jest; KnownAgent byłby potrzebny do tego... ale go nie ma
+        <d> <c> <p_m> <t_q> <n_p> <c_p> <s_q> <p_r> <r_m>
+        d - czy wie gdzie jest;
         c - color
         p_m - prawdopodobienstwo ruchu
         t_q - jakość transmisji o ile sygnał danego transmitera może być zły
         n_p - liczba cząsteczek
+        c_p - procent czastek ktore umieraja
         s_q - jakość odbiornika; o ile sygnał może być źle odczytany
+        p_r - prawdopodobienstwo szumu czasteczki
+        r_m - wielkosc szumu czasteczki
 
         Argument path to sciezka do pliku zawierajacego opis srodowiska."""
 
@@ -36,8 +40,12 @@ class Env:
         self.n = int(file.readline().strip())
         self.agentsInfo = {}
         self.agents = []
+        self.transmissions = None
 
         for i in range(self.n):
+            x = random.randint(0, self.width - 1)
+            y = random.randint(0, self.height - 1)
+
             tokens = file.readline().strip().split()
             d = 1 == int(tokens[0])
             c = tokens[1]
@@ -48,22 +56,24 @@ class Env:
             s_q = 1.0
             if d is not True:
                 n_p = int(tokens[4])
-                s_q = float(tokens[5])
-                agent = ParticleAgent(p_m, n_p, s_q, t_q, c, self.width, self.height)
+                c_p = float(tokens[5])
+                s_q = float(tokens[6])
+                p_r = float(tokens[7])
+                r_m = float(tokens[8])
+                agent = ParticleAgent(p_m, n_p, c_p, s_q, t_q, p_r, r_m, c, self.width, self.height)
             else:
-                agent = ParticleAgent(p_m, n_p, s_q, t_q, c, self.width, self.height)
-                #agent = KnownAgent(p_m, n_p, s_q, t_q)
+                agent = KnownAgent(x, y, p_m, t_q, c, self.width, self.height)
             self.agents.append(agent)
-            x = random.randint(0, self.width - 1)
-            y = random.randint(0, self.height - 1)
             self.agentsInfo[agent] = {"x" : x, "y" : y, "d" : d, "p_m" : p_m, "t_q" : t_q, "s_q" : s_q}
         self.cycleAgents = cycle(self.agents)
         self.currentAgent = next(self.cycleAgents)
         file.close()
+        self.__send_signal()
         return
 
     def __send_signal(self):
         """Aktualizuje stan sensora aktualnego agenta."""
+        transmissions = []
         for agent in self.agents:
             if agent is not self.currentAgent:
                 agentInfo = self.agentsInfo[agent]
@@ -71,7 +81,9 @@ class Env:
                 distance = abs(agentInfo["x"] - currentAgentInfo["x"]) + abs(agentInfo["y"] - currentAgentInfo["y"])
 
                 signal = random.uniform(agentInfo["t_q"], 2 - agentInfo["t_q"]) * random.uniform(currentAgentInfo["s_q"], 2 - currentAgentInfo["s_q"]) * distance
-                self.currentAgent.sense(signal, agent)
+                transmissions.append((agent, signal))
+        self.currentAgent.sense(transmissions)
+        self.transmissions = transmissions
 
     def __move_agent(self, agent, motion):
         agentInfo = self.agentsInfo[agent]
